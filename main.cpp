@@ -3,24 +3,98 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
+#include <time.h>
+#include <stdlib.h>
 using namespace std;
 
 vector <pair<int, int>> snake;
+int item_pos[3][3] = {0}; //item이 생성될 좌표를 저장할 배열, 0으로 초기화. 최대 3개의 아이템 생성
+int n;// number of item;
+
+
 void game1();
 void open();
-void make_snake(){for(int i=0; i<13; i++)snake.push_back(make_pair(20, 20-i));}
+bool get_item();
+
+void make_snake(){for(int i=0; i<5; i++)snake.push_back(make_pair(20, 20-i));}
+
+//인자로 입력받은 w1윈도우에 snake 모습 출력.
 void show_snake(WINDOW* w1){
   for(int i=0; i<snake.size(); i++){
     mvwaddch(w1, snake[i].first, snake[i].second, '0');}
   wrefresh(w1);
-}//인자로 입력받은 w1윈도우에 snake 모습 출력.
+}
+void get_item(int d){
+  int l = snake.size();
+  for(int i=0; i<=n; i++){
+    if(snake[0].first == item_pos[i][0] && snake[0].second == item_pos[i][1]){
+      snake.push_back(make_pair(snake[l-1].first, snake[l-1].second));
+      switch(d){
+        case 1:
+          snake[l].first -= 1;
+          break;
+        case 2:
+          snake[l].first += 1;
+          break;
+        case 3:
+          snake[l].second += 1;
+          break;
+        case 4:
+          snake[l].second -= 1;
+      }
+    }
+  }
+}
 int check_crush_body(){
   for(int i=1; i<snake.size(); i++){
     if(snake[0].first == snake[i].first && snake[0].second == snake[i].second)
-      return 1;
-  }
+      return 1; }
   return 0;
 }
+
+bool check_pos_item(int p1, int p2){
+  for(int i=0; i<snake.size(); i++){
+    if(snake[i].first == p1 && snake[i].second == p2) return false;
+  }
+  return true;
+}
+void grow_item(WINDOW* w1){
+
+  //임시로 시작점이 (5,5) 이고 가로 40p 세로 100p의 크기의 window에 random item생성하는 함수
+  //추후 map 생성시 반영하여 수정
+
+  int start_pos[2] = {5, 5};
+  int h = 100, w = 40;
+  srand((unsigned int)time(0)); // 시드값으로 현재의 시간 초 입력.
+  n = rand()%3;
+  mvwaddch(w1,0, 0, 48+n);
+  for(int i = 0; i <= n; i++){
+    do{
+    item_pos[i][0] = (rand()%(w - 1)) + 1;
+    item_pos[i][1] = (rand()%(h - 1)) + 1;
+  }while(!(check_pos_item(item_pos[i][0], item_pos[i][1]))) ;// 만일 임의의 좌표에 아이템 생성 불가시.
+    item_pos[i][2] = time(0);
+  }
+
+  for(int i=0; i<=n; i++){
+    mvwaddch(w1, item_pos[i][0], item_pos[i][1], 'g');
+  }
+  wrefresh(w1);
+}
+
+bool del_item(WINDOW* w1){
+  if(time(0) - item_pos[0][2] > 4){
+    for(int i=0; i<=n; i++){
+      mvwaddch(w1, item_pos[i][0], item_pos[i][1], ' ');
+    }
+    wrefresh(w1);
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
 void draw_snake(WINDOW* wsnake){
 
   noecho();//입력 값 출력하지 않음.
@@ -36,11 +110,15 @@ void draw_snake(WINDOW* wsnake){
   d = KEY_RIGHT;
   int old_d = 3;
   int q = 0;
+  grow_item(wsnake);
   while(1){
-
+    if(del_item(wsnake)){
+      grow_item(wsnake);}
     d = wgetch(wsnake);
     flushinp();
-    usleep(100000);
+    usleep(50000);
+
+
     mvwaddch(wsnake, snake.back().first, snake.back().second, ' ');
     //꼬리 지우기
 
@@ -70,20 +148,18 @@ void draw_snake(WINDOW* wsnake){
     switch(old_d){
       case 1:
         snake[0].first -= 1;
-        q = check_crush_body();
         break;
       case 2:
         snake[0].first += 1;
-        q = check_crush_body();
         break;
       case 3:
         snake[0].second += 1;
-        q = check_crush_body();
         break;
       case 4:
         snake[0].second -= 1;
-        q = check_crush_body();
     }
+    q = check_crush_body();
+    get_item(old_d);
 
     if(q == 1){// 반대 키 입력되었을때 종료.
       break;}
