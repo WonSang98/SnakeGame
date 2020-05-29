@@ -7,6 +7,65 @@
 #include <stdlib.h>
 using namespace std;
 
+class Snake{
+private:
+  vector <pair<int, int>> body; //Snake의 몸 좌표 저장. 0(head) ~ -1(tail)
+  int grow_pos[3][3] = {0}; //grow item이 생성 될 좌표를 저장할 배열.(poison or grow)
+  int grow_n; //grow 의 개수
+
+  // 추후 추가 할 변수 목록
+  // poison item의 좌표와 개수;
+  // Score 변수
+  // wall에 생성될 portal 관련 변수
+  // 기타 등등
+
+  //Window Function
+  void InitHome();// 처음 시작화면(윈도우 생성)
+  void Stage_1(); // First Stage
+
+  //Snake Function
+  void MakeSnake(); // 처음 뱀 상태 초기화 (길이 3 생성 좌표는 인자로 줘서 맵 마다 다르게 할 예정, 추후 업데이트))
+  void ShowSnake(); // 뱀 화면에 출력.
+
+  //Item Function 인자에 따라 Grow인지 Poison인지 구분.
+  void SpawnItem(); // item 생성.
+  void DelItem(); //  item 시간이 지났는지 체크 후 삭제.
+  void GetItem(); // item 먹음.
+
+  //Check Function
+  void CrushBody(); // Snake의 head가 Body에 닿았는지 체크.
+  void UnableItem(); // 아이템이 생성 가능한 지 확인.
+};
+
+void InitHome(){
+  int key;
+
+  initscr(); // 처음 Main 화면 생성.
+
+  keypad(stdscr, TRUE); // 특수키 입력 가능.
+  curs_set(0); // cursor 안 보이게.
+  noecho(); // 입력 값 출력 안 되게 하기.
+
+  start_color();
+  init_pair(1, COLOR_GREEN, COLOR_WHITE); // 배경이 white, 글씨가 green
+
+  bkgd(COLOR_PAIR(1)); // pair 1의 색으로 배경 색칠
+
+  mvprintw(3, 4, "Test Game -> prees enter key");
+
+  border('|','|','-','-','0','0','0','0');
+  refresh();
+
+  key = getch();
+  switch(key){
+    case 10:
+      Stage_1();
+  }
+  if(key == 10){ // 10 is ENTER_KEY
+
+  }
+
+}
 vector <pair<int, int>> snake;
 int item_pos[3][3] = {0}; //item이 생성될 좌표를 저장할 배열, 0으로 초기화. 최대 3개의 아이템 생성
 int n;// number of item;
