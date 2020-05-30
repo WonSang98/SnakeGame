@@ -52,6 +52,7 @@ void draw_map();
 
 void draw_map(){
 	init_pair(2, COLOR_GREEN, COLOR_WHITE);
+	// String has '\0' at edge
 	WINDOW *game = newwin(40, 101, 5, 5);
 	attron(COLOR_PAIR(2));
 	wbkgd(game, COLOR_PAIR(2));
