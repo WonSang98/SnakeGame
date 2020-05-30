@@ -7,17 +7,60 @@
 #include <stdlib.h>
 using namespace std;
 
+class Stage{ //main 화면 부터 stage까지 생성.
+public:
+  int sx, sy; //stage window 생성 위치
+  int s1_h, s1_w; //stage1의 가로 세로 길이
+  //Window Function
+  Stage();
+  void InitHome();// 처음 시작화면(윈도우 생성)
+  void Stage_1(); // First Stage
+};
+
 class Snake{
 public:
+
   int set_x, set_y; // Snake 생성 좌표 지정.
   int min_len = 3;
   int max_len = 12; // Snake 최소 최대 길이 지정.
   vector <pair<int, int>> body; //Snake의 몸 좌표 저장. 0(head) ~ -1(tail)
   int item_pos[2][3][3] = {0}; //grow item이 생성 될 좌표를 저장할 배열.(poison or grow)
   int item_n[2] = {0}; //grow 의 개수
-  char item_shape[2] = {'g', 'p'};
+  char item_shape[2] = {'5', '6'};
   int h, w;
 
+  char map[1][30][61] = {
+    {"211111111111111111111111111111111111111111111111111111111112",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000001111111111000000000000000000000000111111111100000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000011111111110000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000001111111111000000000000000000000000111111111100000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000011111111110000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000001111111111000000000000000000000000111111111100000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000011111111110000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000001111111111000000000000000000000000111111111100000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000011111111110000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000001111111111000000000000000000000000111111111100000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "100000000000000000000000000000000000000000000000000000000001",
+    "211111111111111111111111111111111111111111111111111111111112"}
+  };
   // 추후 추가 할 변수 목록
   // poison item의 좌표와 개수;
   // Score 변수
@@ -27,11 +70,11 @@ public:
 
   //Snake Function
   Snake(int y, int x, int h, int w); //생성자.
-  void ShowSnake(WINDOW* w1); // 뱀 화면에 출력.
+  void ShowSnake(int stage_num); // 뱀 화면에 출력.
 
   //Item Function 인자에 따라 Grow인지 Poison인지 구분.
-  void SpawnItem(WINDOW* w1, int t, int h, int w); // item 생성.
-  void DelItem(WINDOW* w1, int t, int h, int w); //  item 시간이 지났는지 체크 후 삭제.
+  void SpawnItem(int stage_num, int t); // item 생성.
+  void DelItem(int stage_num,  int t, int h, int w); //  item 시간이 지났는지 체크 후 삭제.
   bool GetItem(int f, int s, int t); // item 먹음.
 
   //Check Function
@@ -39,45 +82,42 @@ public:
   bool UnableItem(int p1, int p2); // 아이템이 생성 가능한 지 확인.
 
   void UpdateSnake();// 꼬리부터 머리까지 움직이는 방향으로 좌표 최신
-  void Game(WINDOW* w1);// 게임 시작!
+  void Game(WINDOW* w1, int stage_num);// 게임 시작!
 };
 
 Snake::Snake(int y, int x, int height, int width):set_y(y), set_x(x), h(height), w(width){//생성자
   for(int i=0; i<3; i++){
       body.push_back(make_pair(set_y, set_x-i));} // 뱀 위치, 크기 초기화
 }
-void Snake::ShowSnake(WINDOW* w1){
-  for(int i = 0; i < body.size(); i++){
-    mvwaddch(w1, body[i].first, body[i].second, '0');}
-  wrefresh(w1);
+void Snake::ShowSnake(int stage_num){
+  map[stage_num][body[0].first][body[0].second] = '3';
+  for(int i = 1; i < body.size(); i++){
+    map[stage_num][body[i].first][body[i].second] = '4';}
 }
 //아이템 생성 , t(타입)이 grow인지 poison인지 구분
-void Snake::SpawnItem(WINDOW* w1, int t, int h, int w){
+void Snake::SpawnItem(int stage_num,  int t){
   //t가 1이면 grow아이템 t가 0이면 poison 아이템
   srand((unsigned int)time(0)); // 시드값으로 현재의 시간 초 입력.
   item_n[t] = rand()%3; // 아이템 개수 1~3개 정하기.
   for(int i = 0; i <= item_n[t]; i++){
     do{
-    item_pos[t][i][0] = (rand()%(h - 1)) + 1;
-    item_pos[t][i][1] = (rand()%(w - 1)) + 1;
+    item_pos[t][i][0] = (rand()%(h)) + 1;
+    item_pos[t][i][1] = (rand()%(w)) + 1;
   }while(!(UnableItem(item_pos[t][i][0], item_pos[t][i][1]))) ;// 만일 임의의 좌표에 아이템 생성 불가시.
     item_pos[t][i][2] = time(0);
   }
   // 생성할 아이템 개수만큼 만들어질 좌표 정해주고 생성 시간 저장.
   // 만약 만들어질 좌표에 이미 무언가 있다면 다시 좌표 지정.
-
   //생성된 좌표에 따라 아이템 생성.
   for(int i=0; i<=item_n[t]; i++){
-    mvwaddch(w1, item_pos[t][i][0], item_pos[t][i][1], item_shape[t]);
+    map[stage_num][item_pos[t][i][0]][item_pos[t][i][1]] = item_shape[t];
   }
-  wrefresh(w1);
 }
 
-void Snake::DelItem(WINDOW* w1, int t, int h, int w){
+void Snake::DelItem(int stage_num,  int t, int h, int w){
   if(time(0) - item_pos[t][0][2] > 12){
-    for(int i=0; i<=item_n[t]; i++){mvwaddch(w1, item_pos[t][i][0], item_pos[t][i][1], ' ');}
-  wrefresh(w1);
-  SpawnItem(w1, t, h, w);}
+    for(int i=0; i<=item_n[t]; i++){map[stage_num][item_pos[t][i][0]][item_pos[t][i][1]] = '0';}
+  SpawnItem(stage_num, t);}
 }
     // 만약 t 타입의 아이템이 생성된지 5초가 지났다면 지워버리고 true return
     // 아니라면 false return
@@ -108,21 +148,20 @@ void Snake::UpdateSnake(){ //진행방향으로 Snake 꼬리부터 머리쪽으�
       body[i].first = body[i-1].first;
       body[i].second = body[i-1].second;}
 }
-void Snake::Game(WINDOW* w1){
+void Snake::Game(WINDOW* w1,int stage_num){
   int d = KEY_RIGHT; // Snake 진행방향
   int old_d = 3;// Snake 이전 진행방향
   int q = 0;
-
-  SpawnItem(w1, 0, h, w);//아이템 생성
+  SpawnItem(stage_num, 0);
   while(1){
-    DelItem(w1, 0, h, w); // 아이템 삭제 조건 충족 시 삭제 후 재 생성
+    DelItem(stage_num, 0, h, w); // 아이템 삭제 조건 충족 시 삭제 후 재 생성
 
     d = wgetch(w1);
     flushinp();
-    usleep(250000);
+    usleep(500000);
 
     //꼬리 자르기
-    mvwaddch(w1, body.back().first, body.back().second, ' ');
+    map[stage_num][body.back().first][body.back().second] = '0';
 
     //키 입력 -> 좀 더 단순화 가능 할 듯, 고안해보기.
     //추측이지만 특수키입력에도 정수가 있는듯, KEY_ENTER가 10이듯, 그걸 사용하면 스위치 하나 없앨 수 있지 않을까?
@@ -183,27 +222,46 @@ void Snake::Game(WINDOW* w1){
           UpdateSnake();
           body[0].second -= 1;
         }
-    }
+      }
+      ShowSnake(stage_num);
+        for(int i = 0; i < h; i++){
+    		    for(int j = 0; j < w; j++){
+              switch(map[0][i][j]){
+                case 48:
+                  mvwaddch(w1, i, j, ' ');
+                  break;
+                case 49:
+                  mvwaddch(w1, i, j, 'W');
+                  break;
+                case 50:
+                  mvwaddch(w1, i, j, 'I');
+                  break;
+                case 51:
+                  mvwaddch(w1, i, j, 'H');
+                  break;
+                case 52:
+                  mvwaddch(w1, i, j, 'B');
+                  break;
+                case 53:
+                  mvwaddch(w1, i, j, 'G');
+                  break;
+                case 54:
+                  mvwaddch(w1, i, j, 'P');
+                  break;
+                case 55:
+                  mvwaddch(w1, i, j, 'R');
+                }
+    			 }
+         }
+
     q = CrushBody();
     if(q == 1){break;}
-    ShowSnake(w1);
+    wrefresh(w1);
   }
-
 }
-
-class Stage{ //main 화면 부터 stage까지 생성.
-public:
-  int sx, sy; //stage window 생성 위치
-  int s1_h, s1_w; //stage1의 가로 세로 길이
-  //Window Function
-  Stage();
-  void InitHome();// 처음 시작화면(윈도우 생성)
-  void Stage_1(); // First Stage
-};
-
 Stage::Stage(){ // 생성자.
   sx = 5; sy = 5;
-  s1_h = 40; s1_w = 100;
+  s1_h = 30; s1_w = 60;
 }
 void Stage::InitHome(){
   int key;
@@ -236,18 +294,17 @@ void Stage::InitHome(){
 }
 
 void Stage::Stage_1(){
+
   WINDOW *s1 = newwin(s1_h, s1_w, sy, sx); //stage1 화면 생성.
   init_pair(2, COLOR_RED, COLOR_BLACK);
+  attron(COLOR_PAIR(2));
   wbkgd(s1, COLOR_PAIR(2));
-  wborder(s1, '@','@','@','@','@','@','@','@');
-  wrefresh(s1);
 
   keypad(s1, TRUE);
   nodelay(s1, TRUE); // 입력을 안 받아도 넘어가게 해 주는 함수.
 
-  Snake s(sy, sx, s1_h, s1_w); //20, 20위치에 뱀 생성.
-  s.Game(s1);
-
+  Snake s(10, 10, s1_h, s1_w); //20, 20위치에 뱀 생성.
+  s.Game(s1, 0);
   getch();
   delwin(s1);
 }
