@@ -74,7 +74,7 @@ public:
 
   //Item Function 인자에 따라 Grow인지 Poison인지 구분.
   void SpawnItem(int stage_num, int t); // item 생성.
-  void DelItem(int stage_num,  int t, int h, int w); //  item 시간이 지났는지 체크 후 삭제.
+  void DelItem(int stage_num, int t, int h, int w); //  item 시간이 지났는지 체크 후 삭제.
   bool GetItem(int f, int s, int t); // item 먹음.
 
   //Check Function
@@ -95,7 +95,7 @@ void Snake::ShowSnake(int stage_num){
     map[stage_num][body[i].first][body[i].second] = '4';}
 }
 //아이템 생성 , t(타입)이 grow인지 poison인지 구분
-void Snake::SpawnItem(int stage_num,  int t){
+void Snake::SpawnItem(int stage_num, int t){
   //t가 1이면 grow아이템 t가 0이면 poison 아이템
   srand((unsigned int)time(0)); // 시드값으로 현재의 시간 초 입력.
   item_n[t] = rand()%3; // 아이템 개수 1~3개 정하기.
@@ -114,7 +114,7 @@ void Snake::SpawnItem(int stage_num,  int t){
   }
 }
 
-void Snake::DelItem(int stage_num,  int t, int h, int w){
+void Snake::DelItem(int stage_num, int t, int h, int w){
   if(time(0) - item_pos[t][0][2] > 12){
     for(int i=0; i<=item_n[t]; i++){map[stage_num][item_pos[t][i][0]][item_pos[t][i][1]] = '0';}
   SpawnItem(stage_num, t);}
