@@ -24,7 +24,7 @@ public:
   int min_len = 3;
   int max_len = 12; // Snake 최소 최대 길이 지정.
   vector <pair<int, int> > body; //Snake의 몸 좌표 저장. 0(head) ~ -1(tail)
-  int item_pos[3][4] = {{{0}}}; //grow item이 생성 될 좌표를 저장할 배열.(poison or grow)
+  int item_pos[3][4] = {0}; //grow item이 생성 될 좌표를 저장할 배열.(poison or grow)
   int item_n = 0; //grow 의 개수
   int itemType = 0;
   char item_shape[2] = {'5', '6'};
@@ -207,7 +207,10 @@ void Snake::Game(WINDOW* w1,int stage_num){
           if(diffItem(body[0].first -1, body[0].second)){
             body.insert(body.begin(),(make_pair(body[0].first - 1, body[0].second)));
           }else{
-
+            map[stage_num][body.back().first][body.back().second] = '0';
+            UpdateSnake();
+            body[0].first -= 1;
+            body.pop_back();
           }
         }else{
           UpdateSnake();
@@ -219,6 +222,10 @@ void Snake::Game(WINDOW* w1,int stage_num){
         if(diffItem(body[0].first +1, body[0].second)){
           body.insert(body.begin(),(make_pair(body[0].first + 1, body[0].second)));
         }else{
+            map[stage_num][body.back().first][body.back().second] = '0';
+            UpdateSnake();
+            body[0].first += 1;
+            body.pop_back();
         }
       }else{
           UpdateSnake();
@@ -227,10 +234,13 @@ void Snake::Game(WINDOW* w1,int stage_num){
         break;
       case 3:
       if(GetItem(body[0].first, body[0].second + 1)){
-        if(diffItem(body[0].first , body[0].second) + 1){
+        if(diffItem(body[0].first , body[0].second + 1)){
           body.insert(body.begin(),(make_pair(body[0].first, body[0].second + 1)));
         }else{
-
+          map[stage_num][body.back().first][body.back().second] = '0';
+          UpdateSnake();
+          body[0].second += 1;
+          body.pop_back();
         }
       }else{
           UpdateSnake();
@@ -239,10 +249,13 @@ void Snake::Game(WINDOW* w1,int stage_num){
         break;
       case 4:
       if(GetItem(body[0].first, body[0].second - 1)){
-        if(diffItem(body[0].first , body[0].second) - 1){
+        if(diffItem(body[0].first , body[0].second - 1)){
           body.insert(body.begin(),(make_pair(body[0].first, body[0].second -1)));
         }else{
-
+          map[stage_num][body.back().first][body.back().second] = '0';
+          UpdateSnake();
+          body[0].second -= 1;
+          body.pop_back();
         }
       }else{
           UpdateSnake();

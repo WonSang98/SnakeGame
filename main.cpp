@@ -95,6 +95,8 @@ public:
   int GetGate(int stage_num, int f, int s); // gate탔는지 안탔는지 체크
   int MoveGate(int stage_num, int d, int gate_idx);// 게이트에 따른 움직임.
   void UpdateSnake();// 꼬리부터 머리까지 움직이는 방향으로 좌표 최신
+
+  void ShowWin(WINDOW* w1);
   void Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num);// 게임 시작!
 };
 
@@ -226,7 +228,7 @@ void Snake::DelGate(int stage_num, int h, int w){
     for(int i=0; i<2; i++){
       map[stage_num][gate[i][0]][gate[i][1]] = '1';
   }
-  SpawnGate(stage_num, h, w);}
+  if(body.size() > 3) SpawnGate(stage_num, h, w);}
 }
 void Snake::SpawnGate(int stage_num, int h, int w){
   srand((unsigned int)time(0)); // 시드값으로 현재의 시간 초 입력.
@@ -250,10 +252,10 @@ void Snake::SpawnGate(int stage_num, int h, int w){
   gate[1][0] = h2;
   gate[1][1] = w2;
   gate[1][2] = time(0);
-
-  map[stage_num][h1][w1] = '7';
-  map[stage_num][h2][w2] = '7';
-
+  if(body.size() > 4){
+    map[stage_num][h1][w1] = '7';
+    map[stage_num][h2][w2] = '7';
+  }
 }
 int Snake::GetGate(int stage_num, int f, int s){
   //들어간 게이트가 gate[0] 인지 gate[1]인지 확인
@@ -275,15 +277,53 @@ void Snake::UpdateSnake(){ //진행방향으로 Snake 꼬리부터 머리쪽으�
       body[i].first = body[i-1].first;
       body[i].second = body[i-1].second;}
 }
+
+void Snake::ShowWin(WINDOW* w1){
+  for(int i = 0; i < h; i++){
+      for(int j = 0; j < w; j++){
+        switch(map[0][i][j]){
+          case 48:
+            mvwaddch(w1, i, j, ' ');
+            break;
+          case 49:
+            mvwaddch(w1, i, j, '-');
+            break;
+          case 50:
+            mvwaddch(w1, i, j, 'X');
+            break;
+          case 51:
+            mvwaddch(w1, i, j, 'H');
+            break;
+          case 52:
+            mvwaddch(w1, i, j, 'B');
+            break;
+          case 53:
+            mvwaddch(w1, i, j, 'G');
+            break;
+          case 54:
+            mvwaddch(w1, i, j, 'P');
+            break;
+          case 55:
+            mvwaddch(w1, i, j, 'A');
+            break;
+          case 57:
+            mvwaddch(w1, i, j, ' ');
+          }
+     }
+   }
+}
 void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
+
   int d = KEY_RIGHT; // Snake 진행방향
   int old_d = 3;// Snake 이전 진행방향
   int q = 0;
+  int g; //gate 들어갔는지 확인 변수
+
   SpawnItem(stage_num, 0);
   SpawnGate(stage_num, h, w);
+
   while(1){
-    DelItem(stage_num, 0, h, w); // 아이템 삭제 조건 충족 시 삭제 후 재 생성
-    DelGate(stage_num, h, w);
+
     d = wgetch(w1);
     flushinp();
     usleep(150000);
@@ -291,29 +331,27 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
     //꼬리 자르기
     map[stage_num][body.back().first][body.back().second] = '0';
 
-    //키 입력 -> 좀 더 단순화 가능 할 듯, 고안해보기.
-    //추측이지만 특수키입력에도 정수가 있는듯, KEY_ENTER가 10이듯, 그걸 사용하면 스위치 하나 없앨 수 있지 않을까?
-    // 이 부분 단순화 후 함수로 다시 정리하기.
-    switch(d)
-    {
+    switch(d){
     case KEY_UP:
       if(old_d == 2){q = 1;}
       old_d = 1;
+      g = GetGate(stage_num, body[0].first - 1, body[0].second);
       break;
     case KEY_DOWN :
       if(old_d == 1){q = 1;}
       old_d = 2;
+      g = GetGate(stage_num, body[0].first + 1, body[0].second);
       break;
     case KEY_RIGHT :
       if(old_d == 4){q = 1;}
       old_d = 3;
+      g = GetGate(stage_num, body[0].first, body[0].second + 1);
       break;
     case KEY_LEFT :
       if(old_d == 3){q = 1;}
       old_d = 4;
-    }
+      g = GetGate(stage_num, body[0].first, body[0].second - 1);}
 
-    int g;//gate 들어갔는지 체크, 들어갔으면 진출게이트 idx+1 return값 저장
     switch(old_d){
       case 1:
         g = GetGate(stage_num, body[0].first - 1, body[0].second);
@@ -326,10 +364,13 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
         break;
       case 4:
         g = GetGate(stage_num, body[0].first, body[0].second - 1);
-    }
+      }
+
     if(g){
       UpdateSnake();
       old_d = MoveGate(stage_num, old_d, g-1);}
+
+
     switch(old_d){
       case 1:
 
@@ -368,41 +409,15 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
           body[0].second -= 1;
         }
       }
+
       q = CrushBody(stage_num);
+
       if(q == 1){break;}
+
       ShowSnake(stage_num);
-        for(int i = 0; i < h; i++){
-    		    for(int j = 0; j < w; j++){
-              switch(map[0][i][j]){
-                case 48:
-                  mvwaddch(w1, i, j, ' ');
-                  break;
-                case 49:
-                  mvwaddch(w1, i, j, '-');
-                  break;
-                case 50:
-                  mvwaddch(w1, i, j, 'X');
-                  break;
-                case 51:
-                  mvwaddch(w1, i, j, 'H');
-                  break;
-                case 52:
-                  mvwaddch(w1, i, j, 'B');
-                  break;
-                case 53:
-                  mvwaddch(w1, i, j, 'G');
-                  break;
-                case 54:
-                  mvwaddch(w1, i, j, 'P');
-                  break;
-                case 55:
-                  mvwaddch(w1, i, j, 'A');
-                  break;
-                case 57:
-                  mvwaddch(w1, i, j, ' ');
-                }
-    			 }
-         }
+      ShowWin(w1);
+      DelGate(stage_num, h, w);
+      DelItem(stage_num, 0, h, w); // 아이템 삭제 조건 충족 시 삭제 후 재 생성
 
     wrefresh(w1);
     wrefresh(score);
