@@ -131,6 +131,7 @@ bool Snake::GetItem(int f, int s, int t){ // item 먹음.
 
 //Check Function
 bool Snake::CrushBody(int stage_num){ // Snake의 head가 Body에 닿았는지 체크.
+  if(body.size() < 3){return true;}
   if(map[stage_num][body[0].first][body[0].second] == '1'){
     return true;
   }
