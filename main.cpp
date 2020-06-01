@@ -26,8 +26,9 @@ public:
   int min_len = 3;
   int max_len = 12; // Snake 최소 최대 길이 지정.
   vector <pair<int, int>> body; //Snake의 몸 좌표 저장. 0(head) ~ -1(tail)
-  int item_pos[2][3][3] = {0}; //grow item이 생성 될 좌표를 저장할 배열.(poison or grow)
-  int item_n[2] = {0}; //grow 의 개수
+  int item_pos[3][4] = {0}; //grow item이 생성 될 좌표를 저장할 배열.(poison or grow)
+  int item_n = 0; //grow 의 개수
+  int itemType = 0;
   char item_shape[2] = {'5', '6'};
   int h, w;
   int gate[2][3];
@@ -79,10 +80,10 @@ public:
   void ShowSnake(int stage_num); // 뱀 화면에 출력.
 
   //Item Function 인자에 따라 Grow인지 Poison인지 구분.
-  void SpawnItem(int stage_num, int t); // item 생성.
-  void DelItem(int stage_num, int t, int h, int w); //  item 시간이 지났는지 체크 후 삭제.
-  bool GetItem(int f, int s, int t); // item 먹음.
-
+  void SpawnItem(int stage_num); // item 생성.
+  void DelItem(int stage_num); //  item 시간이 지났는지 체크 후 삭제.
+  bool GetItem(int f, int s); // item 먹음.
+  bool diffItem(int f, int s);
 
   //Check Function
   bool CrushBody(int stage_num); // Snake의 head가 Body에 닿았는지 체크.
@@ -110,40 +111,49 @@ void Snake::ShowSnake(int stage_num){
     map[stage_num][body[i].first][body[i].second] = '4';}
 }
 //아이템 생성 , t(타입)이 grow인지 poison인지 구분
-void Snake::SpawnItem(int stage_num, int t){
+void Snake::SpawnItem(int stage_num){
   //t가 1이면 grow아이템 t가 0이면 poison 아이템
   srand((unsigned int)time(0)); // 시드값으로 현재의 시간 초 입력.
-  item_n[t] = rand()%3; // 아이템 개수 1~3개 정하기.
-  for(int i = 0; i <= item_n[t]; i++){
+  item_n = rand()%3; // 아이템 개수 1~3개 정하기.
+  for(int i = 0; i <= item_n; i++){
     do{
-    item_pos[t][i][0] = (rand()%(h)) + 1;
-    item_pos[t][i][1] = (rand()%(w)) + 1;
-  }while(!(UnableItem(stage_num, item_pos[t][i][0], item_pos[t][i][1]))) ;// 만일 임의의 좌표에 아이템 생성 불가시.
-    item_pos[t][i][2] = time(0);
+    itemType = rand()%2;
+    item_pos[i][0] = (rand()%(h)) + 1;
+    item_pos[i][1] = (rand()%(w)) + 1;
+    item_pos[i][3] = itemType;
+  }while(!(UnableItem(stage_num, item_pos[i][0], item_pos[i][1]))) ;// 만일 임의의 좌표에 아이템 생성 불가시.
+    item_pos[i][2] = time(0);
   }
   // 생성할 아이템 개수만큼 만들어질 좌표 정해주고 생성 시간 저장.
   // 만약 만들어질 좌표에 이미 무언가 있다면 다시 좌표 지정.
   //생성된 좌표에 따라 아이템 생성.
-  for(int i=0; i<=item_n[t]; i++){
-    map[stage_num][item_pos[t][i][0]][item_pos[t][i][1]] = item_shape[t];
+  for(int i=0; i<=item_n; i++){
+    map[stage_num][item_pos[i][0]][item_pos[i][1]] = item_shape[item_pos[i][3]];
   }
 }
 
-void Snake::DelItem(int stage_num, int t, int h, int w){
-  if(time(0) - item_pos[t][0][2] > 4){
-    for(int i=0; i<=item_n[t]; i++){map[stage_num][item_pos[t][i][0]][item_pos[t][i][1]] = '0';}
-  SpawnItem(stage_num, t);}
+void Snake::DelItem(int stage_num){
+  if(time(0) - item_pos[0][2] > 6){
+    for(int i=0; i<=item_n; i++){map[stage_num][item_pos[i][0]][item_pos[i][1]] = '0';}
+  SpawnItem(stage_num);}
 }
     // 만약 t 타입의 아이템이 생성된지 5초가 지났다면 지워버리고 true return
     // 아니라면 false return
 
-bool Snake::GetItem(int f, int s, int t){ // item 먹음.
-  for(int i=0; i<=item_n[t]; i++){
-    if(f == item_pos[t][i][0] && s == item_pos[t][i][1])
+bool Snake::GetItem(int f, int s){ // item 먹음.
+  for(int i=0; i<=item_n; i++){
+    if(f == item_pos[i][0] && s == item_pos[i][1])
       return true;}
   return false;
 }
 
+bool Snake::diffItem(int f, int s){
+  if(map[0][f][s] == item_shape[0]){
+    return true;
+  }else if(map[0][f][s] == item_shape[1]){
+    return false;
+  }
+}
 //Check Function
 bool Snake::CrushBody(int stage_num){ // Snake의 head가 Body에 닿았는지 체크.
   if(body.size() < 3){return true;}
@@ -319,7 +329,7 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
   int q = 0;
   int g; //gate 들어갔는지 확인 변수
 
-  SpawnItem(stage_num, 0);
+  SpawnItem(stage_num);
   SpawnGate(stage_num, h, w);
 
   while(1){
@@ -373,38 +383,61 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
 
     switch(old_d){
       case 1:
-
-        if(GetItem(body[0].first - 1, body[0].second, 0)){//성장 아이템 먹었다면
+      if(GetItem(body[0].first - 1, body[0].second)){
+        if(diffItem(body[0].first -1, body[0].second)){
           body.insert(body.begin(),(make_pair(body[0].first - 1, body[0].second)));
+        }else{
+          UpdateSnake();
+          body[0].first -= 1;
+          map[stage_num][body.back().first][body.back().second] = '0';
+          body.pop_back();
         }
-        else{
+      }else{
           if(g == 0) UpdateSnake();
           body[0].first -= 1;
         }
         break;
       case 2:
-        if(GetItem(body[0].first + 1, body[0].second, 0)){//성장 아이템 먹었다면
-          body.insert(body.begin(), (make_pair(body[0].first + 1, body[0].second)));
+      if(GetItem(body[0].first + 1, body[0].second)){
+        if(diffItem(body[0].first +1, body[0].second)){
+          body.insert(body.begin(),(make_pair(body[0].first + 1, body[0].second)));
+        }else{
+            UpdateSnake();
+            body[0].first += 1;
+            map[stage_num][body.back().first][body.back().second] = '0';
+            body.pop_back();
         }
-        else{
+      }else{
           if(g == 0) UpdateSnake();
           body[0].first += 1;
         }
         break;
       case 3:
-        if(GetItem(body[0].first, body[0].second + 1, 0)){//성장 아이템 먹었다면
+      if(GetItem(body[0].first, body[0].second + 1)){
+        if(diffItem(body[0].first , body[0].second + 1)){
           body.insert(body.begin(),(make_pair(body[0].first, body[0].second + 1)));
+        }else{
+          UpdateSnake();
+          body[0].second += 1;
+          map[stage_num][body.back().first][body.back().second] = '0';
+          body.pop_back();
         }
-        else{
+      }else{
           if(g == 0) UpdateSnake();
           body[0].second += 1;
         }
         break;
       case 4:
-        if(GetItem(body[0].first, body[0].second - 1, 0)){//성장 아이템 먹었다면
-          body.insert(body.begin(),(make_pair(body[0].first, body[0].second - 1)));
+      if(GetItem(body[0].first, body[0].second - 1)){
+        if(diffItem(body[0].first , body[0].second - 1)){
+          body.insert(body.begin(),(make_pair(body[0].first, body[0].second -1)));
+        }else{
+          UpdateSnake();
+          body[0].second -= 1;
+          map[stage_num][body.back().first][body.back().second] = '0';
+          body.pop_back();
         }
-        else{
+      }else{
           if(g == 0) UpdateSnake();
           body[0].second -= 1;
         }
@@ -417,7 +450,7 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
       ShowSnake(stage_num);
       ShowWin(w1);
       DelGate(stage_num, h, w);
-      DelItem(stage_num, 0, h, w); // 아이템 삭제 조건 충족 시 삭제 후 재 생성
+      DelItem(stage_num); // 아이템 삭제 조건 충족 시 삭제 후 재 생성
 
     wrefresh(w1);
     wrefresh(score);

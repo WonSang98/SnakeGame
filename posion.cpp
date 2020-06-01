@@ -207,9 +207,9 @@ void Snake::Game(WINDOW* w1,int stage_num){
           if(diffItem(body[0].first -1, body[0].second)){
             body.insert(body.begin(),(make_pair(body[0].first - 1, body[0].second)));
           }else{
-            map[stage_num][body.back().first][body.back().second] = '0';
             UpdateSnake();
             body[0].first -= 1;
+            map[stage_num][body.back().first][body.back().second] = '0';
             body.pop_back();
           }
         }else{
@@ -222,9 +222,9 @@ void Snake::Game(WINDOW* w1,int stage_num){
         if(diffItem(body[0].first +1, body[0].second)){
           body.insert(body.begin(),(make_pair(body[0].first + 1, body[0].second)));
         }else{
-            map[stage_num][body.back().first][body.back().second] = '0';
             UpdateSnake();
             body[0].first += 1;
+            map[stage_num][body.back().first][body.back().second] = '0';
             body.pop_back();
         }
       }else{
@@ -237,9 +237,9 @@ void Snake::Game(WINDOW* w1,int stage_num){
         if(diffItem(body[0].first , body[0].second + 1)){
           body.insert(body.begin(),(make_pair(body[0].first, body[0].second + 1)));
         }else{
-          map[stage_num][body.back().first][body.back().second] = '0';
           UpdateSnake();
           body[0].second += 1;
+          map[stage_num][body.back().first][body.back().second] = '0';
           body.pop_back();
         }
       }else{
@@ -249,12 +249,12 @@ void Snake::Game(WINDOW* w1,int stage_num){
         break;
       case 4:
       if(GetItem(body[0].first, body[0].second - 1)){
-        if(diffItem(body[0].first , body[0].second - 1)){
+        if(diffItem(body[0].first , body[0].second) - 1){
           body.insert(body.begin(),(make_pair(body[0].first, body[0].second -1)));
         }else{
-          map[stage_num][body.back().first][body.back().second] = '0';
           UpdateSnake();
           body[0].second -= 1;
+          map[stage_num][body.back().first][body.back().second] = '0';
           body.pop_back();
         }
       }else{
