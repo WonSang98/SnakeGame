@@ -6,7 +6,11 @@
 #include <time.h>
 #include <stdlib.h>
 using namespace std;
-
+class Board{
+public:
+    void ScoreBoard(WINDOW* score, int body, int grow, int poison, int gate);
+};
+void ScoreBoard(WINDOW* score, int body, int grow, int poison, int gate);
 class Stage{ //main 화면 부터 stage까지 생성.
 public:
   int sx, sy; //stage window 생성 위치
@@ -15,7 +19,6 @@ public:
   Stage();
   void InitHome();// 처음 시작화면(윈도우 생성)
   void Stage_1(); // First Stage
-  void ScoreBoard(WINDOW* score);
   void Mission(WINDOW* mission);
 };
 
@@ -74,7 +77,6 @@ public:
   // wall에 생성될 portal 관련 변수
   // 기타 등등
 
-
   //Snake Function
   Snake(int y, int x, int h, int w); //생성자.
   void ShowSnake(int stage_num); // 뱀 화면에 출력.
@@ -83,7 +85,7 @@ public:
   void SpawnItem(int stage_num); // item 생성.
   void DelItem(int stage_num); //  item 시간이 지났는지 체크 후 삭제.
   bool GetItem(int f, int s); // item 먹음.
-  bool diffItem(int f, int s);
+  bool diffItem(int f, int s, int *gcnt, int *pcnt);
 
   //Check Function
   bool CrushBody(int stage_num); // Snake의 head가 Body에 닿았는지 체크.
@@ -147,22 +149,20 @@ bool Snake::GetItem(int f, int s){ // item 먹음.
   return false;
 }
 
-bool Snake::diffItem(int f, int s){
+bool Snake::diffItem(int f, int s, int *gcnt, int *pcnt){
   if(map[0][f][s] == item_shape[0]){
+    *gcnt += 1;
     return true;
   }else if(map[0][f][s] == item_shape[1]){
+    *pcnt += 1;
     return false;
   }
 }
 //Check Function
 bool Snake::CrushBody(int stage_num){ // Snake의 head가 Body에 닿았는지 체크.
   if(body.size() < 3){return true;}
-  if(map[stage_num][body[0].first][body[0].second] == '1'){
-    return true;
-  }
-  for(int i=1; i<body.size(); i++){
-    if(body[0].first == body[i].first && body[0].second == body[i].second)
-      return true; }
+  if(map[stage_num][body[0].first][body[0].second] == '1' ||
+    map[stage_num][body[0].first][body[0].second] == '4'){return true;}
   return false;
 }
 
@@ -328,7 +328,8 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
   int old_d = 3;// Snake 이전 진행방향
   int q = 0;
   int g; //gate 들어갔는지 확인 변수
-
+  Board b;
+  int Gcount = 0, Pcount = 0 , Gatecount = 0;
   SpawnItem(stage_num);
   SpawnGate(stage_num, h, w);
 
@@ -345,23 +346,19 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
     case KEY_UP:
       if(old_d == 2){q = 1;}
       old_d = 1;
-      g = GetGate(stage_num, body[0].first - 1, body[0].second);
       break;
     case KEY_DOWN :
       if(old_d == 1){q = 1;}
       old_d = 2;
-      g = GetGate(stage_num, body[0].first + 1, body[0].second);
       break;
     case KEY_RIGHT :
       if(old_d == 4){q = 1;}
       old_d = 3;
-      g = GetGate(stage_num, body[0].first, body[0].second + 1);
       break;
     case KEY_LEFT :
       if(old_d == 3){q = 1;}
       old_d = 4;
-      g = GetGate(stage_num, body[0].first, body[0].second - 1);}
-
+    }
     switch(old_d){
       case 1:
         g = GetGate(stage_num, body[0].first - 1, body[0].second);
@@ -376,7 +373,8 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
         g = GetGate(stage_num, body[0].first, body[0].second - 1);
       }
 
-    if(g){
+    if(g!=0){
+      Gatecount++;
       UpdateSnake();
       old_d = MoveGate(stage_num, old_d, g-1);}
 
@@ -384,22 +382,23 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
     switch(old_d){
       case 1:
       if(GetItem(body[0].first - 1, body[0].second)){
-        if(diffItem(body[0].first -1, body[0].second)){
+        if(diffItem(body[0].first -1, body[0].second, &Gcount, &Pcount)){
           body.insert(body.begin(),(make_pair(body[0].first - 1, body[0].second)));
         }else{
           UpdateSnake();
           body[0].first -= 1;
           map[stage_num][body.back().first][body.back().second] = '0';
           body.pop_back();
+          Pcount++;
         }
       }else{
-          if(g == 0) UpdateSnake();
+          if(g == 0) {UpdateSnake();}
           body[0].first -= 1;
         }
         break;
       case 2:
       if(GetItem(body[0].first + 1, body[0].second)){
-        if(diffItem(body[0].first +1, body[0].second)){
+        if(diffItem(body[0].first +1, body[0].second, &Gcount, &Pcount)){
           body.insert(body.begin(),(make_pair(body[0].first + 1, body[0].second)));
         }else{
             UpdateSnake();
@@ -408,13 +407,13 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
             body.pop_back();
         }
       }else{
-          if(g == 0) UpdateSnake();
+          if(g == 0){ UpdateSnake();}
           body[0].first += 1;
         }
         break;
       case 3:
       if(GetItem(body[0].first, body[0].second + 1)){
-        if(diffItem(body[0].first , body[0].second + 1)){
+        if(diffItem(body[0].first , body[0].second + 1, &Gcount, &Pcount)){
           body.insert(body.begin(),(make_pair(body[0].first, body[0].second + 1)));
         }else{
           UpdateSnake();
@@ -423,13 +422,13 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
           body.pop_back();
         }
       }else{
-          if(g == 0) UpdateSnake();
+          if(g == 0){ UpdateSnake();}
           body[0].second += 1;
         }
         break;
       case 4:
       if(GetItem(body[0].first, body[0].second - 1)){
-        if(diffItem(body[0].first , body[0].second - 1)){
+        if(diffItem(body[0].first , body[0].second - 1, &Gcount, &Pcount)){
           body.insert(body.begin(),(make_pair(body[0].first, body[0].second -1)));
         }else{
           UpdateSnake();
@@ -438,7 +437,7 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
           body.pop_back();
         }
       }else{
-          if(g == 0) UpdateSnake();
+          if(g == 0){ UpdateSnake();}
           body[0].second -= 1;
         }
       }
@@ -453,8 +452,10 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
       DelItem(stage_num); // 아이템 삭제 조건 충족 시 삭제 후 재 생성
 
     wrefresh(w1);
+    b.ScoreBoard(score, body.size(),  Gcount, Pcount, Gatecount);
     wrefresh(score);
     wrefresh(mission);
+
   }
 }
 Stage::Stage(){ // 생성자.
@@ -496,7 +497,6 @@ void Stage::Stage_1(){
   WINDOW *s1 = newwin(s1_h, s1_w, sy, sx); //stage1 화면 생성.
   WINDOW *score = newwin(15, 40, 5, 80);
   WINDOW *mission = newwin(15, 40, 21, 80);
-  ScoreBoard(score);
   Mission(mission);
 
   init_pair(2, COLOR_RED, COLOR_BLACK);
@@ -511,16 +511,16 @@ void Stage::Stage_1(){
   getch();
   delwin(s1);
 }
-void Stage::ScoreBoard(WINDOW *score){
+void Board::ScoreBoard(WINDOW *score, int body, int grow, int poison, int gate){
   init_pair(3, COLOR_BLACK, COLOR_WHITE);
   wmove(score, 0, 0);
 	wattron(score, COLOR_PAIR(3));
   wborder(score, '|','|','-','-','*','*','*','*');
 	wbkgd(score, COLOR_PAIR(3));
-  mvwprintw(score, 3, 3, " B : (Current Length) / (Max Length)" );
-  mvwprintw(score, 4, 3, " + : (Growth Items)" );
-  mvwprintw(score, 5, 3, " - : (Poison Items)" );
-  mvwprintw(score, 6, 3, " G : (gate) ");
+  mvwprintw(score, 3, 3, " B : %d",body );
+  mvwprintw(score, 4, 3, " + : %d",grow );
+  mvwprintw(score, 5, 3, " - : %d",poison );
+  mvwprintw(score, 6, 3, " G : %d ",gate);
 	wrefresh(score);
 }
 
