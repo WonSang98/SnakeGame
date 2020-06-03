@@ -238,7 +238,7 @@ void Snake::DelGate(int stage_num, int h, int w){
     for(int i=0; i<2; i++){
       map[stage_num][gate[i][0]][gate[i][1]] = '1';
   }
-  if(body.size() > 3) SpawnGate(stage_num, h, w);}
+  if(body.size() > 4) SpawnGate(stage_num, h, w);}
 }
 void Snake::SpawnGate(int stage_num, int h, int w){
   srand((unsigned int)time(0)); // 시드값으로 현재의 시간 초 입력.
@@ -253,7 +253,7 @@ void Snake::SpawnGate(int stage_num, int h, int w){
   do{
     h2 = rand()%h;
     w2 = rand()%w;
-  }while((map[stage_num][h2][w2] != '1') || ((h1 != h2) && (w1 != w2)));
+  }while((map[stage_num][h2][w2] != '1') || ((h1 == h2) && (w1 == w2)));
 
   gate[0][0] = h1;
   gate[0][1] = w1;
