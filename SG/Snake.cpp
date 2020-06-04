@@ -345,9 +345,9 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
       if(q == 1){break;}
 
       ShowSnake(stage_num);
-      ShowWin(w1);
       DelGate(stage_num, h, w);
       DelItem(stage_num); // 아이템 삭제 조건 충족 시 삭제 후 재 생성
+      ShowWin(w1);
 
     wrefresh(w1);
     b.ScoreBoard(score, body.size(),  Gcount, Pcount, Gatecount);
