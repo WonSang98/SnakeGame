@@ -10,7 +10,7 @@ public:
   int min_len = 3;
   int max_len = 12; // Snake 최소 최대 길이 지정.
   vector <pair<int, int>> body; //Snake의 몸 좌표 저장. 0(head) ~ -1(tail)
-  int item_pos[3][4] = {0}; //grow item이 생성 될 좌표를 저장할 배열.(poison or grow)
+  int item_pos[3][4] = {0}; //item이 생성 될 좌표를 저장할 배열.(poison or grow)
   int item_n = 0; //grow 의 개수
   int itemType = 0;
   char item_shape[2] = {'5', '6'};
@@ -158,8 +158,8 @@ public:
   // 기타 등등
 
   //Snake Function
-  Snake(int y, int x, int h, int w); //생성자.
-  void ShowSnake(int stage_num); // 뱀 화면에 출력.
+  Snake(int y, int x); //생성자.
+  Snake(int y, int x, int h, int w); //생성자. // 뱀 화면에 출력.
 
   //Item Function 인자에 따라 Grow인지 Poison인지 구분.
   void SpawnItem(int stage_num); // item 생성.
@@ -180,5 +180,6 @@ public:
   void UpdateSnake();// 꼬리부터 머리까지 움직이는 방향으로 좌표 최신
 
   void ShowWin(WINDOW* w1, int stage_num);
+  void ShowSnake(int stage_num);
   bool Game(WINDOW* w1, Board b, int stage_num);// 게임 시작!
 };

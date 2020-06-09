@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Snake.h"
 
-Snake::Snake(int y, int x, int height, int width):set_y(y), set_x(x), h(height), w(width){//생성자
+Snake::Snake(int y, int x, int height, int width):set_y(y), set_x(x), h(height), w(width){//생성자//생성자
   for(int i=0; i<3; i++){
       body.push_back(make_pair(set_y, set_x-i));} // 뱀 위치, 크기 초기화
 }
@@ -10,9 +10,8 @@ void Snake::ShowSnake(int stage_num){
   for(int i = 1; i < body.size(); i++){
     map[stage_num][body[i].first][body[i].second] = '4';}
 }
-//아이템 생성 , t(타입)이 grow인지 poison인지 구분
+//인자로 몇 번째 스테이지인지 받아서 그 맵에다가 스폰 된 아이템 저장.
 void Snake::SpawnItem(int stage_num){
-  //t가 1이면 grow아이템 t가 0이면 poison 아이템
   srand((unsigned int)time(0)); // 시드값으로 현재의 시간 초 입력.
   item_n = rand()%3; // 아이템 개수 1~3개 정하기.
   for(int i = 0; i <= item_n; i++){
@@ -26,7 +25,7 @@ void Snake::SpawnItem(int stage_num){
   }
   // 생성할 아이템 개수만큼 만들어질 좌표 정해주고 생성 시간 저장.
   // 만약 만들어질 좌표에 이미 무언가 있다면 다시 좌표 지정.
-  //생성된 좌표에 따라 아이템 생성.
+  //생성된 좌표에 따라 아이템 Map 배열에 저장
   for(int i=0; i<=item_n; i++){
     map[stage_num][item_pos[i][0]][item_pos[i][1]] = item_shape[item_pos[i][3]];
   }
@@ -37,8 +36,7 @@ void Snake::DelItem(int stage_num){
     for(int i=0; i<=item_n; i++){map[stage_num][item_pos[i][0]][item_pos[i][1]] = '0';}
   SpawnItem(stage_num);}
 }
-    // 만약 t 타입의 아이템이 생성된지 5초가 지났다면 지워버리고 true return
-    // 아니라면 false return
+    // 만약 아이템이 생성된지 6초가 지났다면 지워버리고 새로운 아이템 생성
 
 bool Snake::GetItem(int f, int s){ // item 먹음.
   for(int i=0; i<=item_n; i++){
@@ -111,22 +109,22 @@ int Snake::DefineGate(int stage_num, int d, int gatey, int gatex){
 
   // 진출 방향이 우, 하 일
 
-  if(up != '0' && left != '0'){
+  if(down == '0' && right == '0'){
     if(d == 3 || d == 4 || d == 2) return 2;
     if(d == 1) return 3;
   }
   //진출 방향이 좌, 하 일때
-  if(up != '0' && right != '0'){
+  if(down == '0' && left != '0'){
     if(d == 1 || d == 2 || d == 3) return 2;
     if(d == 4) return 4;
   }
   // 진출 방향이 우, 상 일
-  if(down != '0' && left != '0'){
+  if(up == '0' && right == '0'){
     if(d == 1 || d == 4) return 1;
     if(d == 2 || d == 3) return 3;
   }
   // 진출 방향이 좌, 상 일때
-  if(down != '0' && right != '0'){
+  if(up == '0' && left == '0'){
     if(d == 1 || d == 3) return 1;
     if(d == 2 || d == 4) return 4;
   }
@@ -226,7 +224,8 @@ bool Snake::Game(WINDOW* w1, Board b, int stage_num){
   int old_d = 3;// Snake 이전 진행방향
   int q = 0;
   int g; //gate 들어갔는지 확인 변수
-  int Gcount = 0, Pcount = 0 , Gatecount = 0;
+  int Gcount = 0, Pcount = 0 , Gatecount = 0, MaxBody = 3;
+  int pass = 0; //gate 통과하면 Snake 다 통과할때까지 기다리게 하기 위함.
   SpawnItem(stage_num);
   SpawnGate(stage_num, h, w);
 
@@ -271,6 +270,7 @@ bool Snake::Game(WINDOW* w1, Board b, int stage_num){
       }
 
     if(g!=0){
+      pass = body.size();
       Gatecount++;
       UpdateSnake();
       old_d = MoveGate(stage_num, old_d, g-1);}
@@ -286,7 +286,6 @@ bool Snake::Game(WINDOW* w1, Board b, int stage_num){
           body[0].first -= 1;
           map[stage_num][body.back().first][body.back().second] = '0';
           body.pop_back();
-          Pcount++;
         }
       }else{
           if(g == 0) {UpdateSnake();}
@@ -338,6 +337,7 @@ bool Snake::Game(WINDOW* w1, Board b, int stage_num){
           body[0].second -= 1;
         }
       }
+      if(body.size() > MaxBody) MaxBody = body.size();
 
       q = CrushBody(stage_num);
 
@@ -347,12 +347,12 @@ bool Snake::Game(WINDOW* w1, Board b, int stage_num){
         return false;}
 
       ShowSnake(stage_num);
-      DelGate(stage_num, h, w);
+      if(--pass < 0) DelGate(stage_num, h, w);//지나가는동안 게이트 삭제 ㄴㄴ
       DelItem(stage_num); // 아이템 삭제 조건 충족 시 삭제 후 재 생성
       ShowWin(w1, stage_num);
 
     wrefresh(w1);
-    b.ScoreBoard(body.size(), body.size(),  Gcount, Pcount, Gatecount);
+    b.ScoreBoard(body.size(), MaxBody,  Gcount, Pcount, Gatecount);
     if(b.MissionBoard(body.size(),  Gcount, Pcount, Gatecount)){
       b.gameover();
       delwin(w1);
