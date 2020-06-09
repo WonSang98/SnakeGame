@@ -10,7 +10,7 @@ class Board{
 public:
     void ScoreBoard(WINDOW* score, int body, int grow, int poison, int gate);
 };
-void ScoreBoard(WINDOW* score, int body, int grow, int poison, int gate);
+
 class Stage{ //main 화면 부터 stage까지 생성.
 public:
   int sx, sy; //stage window 생성 위치

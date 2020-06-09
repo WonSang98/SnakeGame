@@ -49,17 +49,8 @@ void draw_map(){
 	wmove(game, 0, 0);
 	for(int i = 0; i < 30; i++){
 		for(int j = 0; j < 60; j++){
-			if(map[i][j] == '0'){
-				waddch(game, ' ');
-			}
-			if(map[i][j] == '1'){
-				waddch(game, 'o');
-			}
-			if(map[i][j] == '2'){
-				waddch(game, '#');
-			}
+			mvwaddch(s1, i, j, map[0][i][j]);
 		}
-		wprintw(game, "\n");
 	}
 	attroff(COLOR_PAIR(2));
 	wrefresh(game);

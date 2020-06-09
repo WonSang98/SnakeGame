@@ -47,11 +47,11 @@ bool Snake::GetItem(int f, int s){ // item 먹음.
   return false;
 }
 
-bool Snake::diffItem(int f, int s, int *gcnt, int *pcnt){
-  if(map[0][f][s] == item_shape[0]){
+bool Snake::diffItem(int f, int s, int *gcnt, int *pcnt, int stage_num){
+  if(map[stage_num][f][s] == item_shape[0]){
     *gcnt += 1;
     return true;
-  }else if(map[0][f][s] == item_shape[1]){
+  }else if(map[stage_num][f][s] == item_shape[1]){
     *pcnt += 1;
     return false;
   }
@@ -186,10 +186,10 @@ void Snake::UpdateSnake(){ //진행방향으로 Snake 꼬리부터 머리쪽으�
       body[i].second = body[i-1].second;}
 }
 
-void Snake::ShowWin(WINDOW* w1){
+void Snake::ShowWin(WINDOW* w1, int stage_num){
   for(int i = 0; i < h; i++){
       for(int j = 0; j < w; j++){
-        switch(map[0][i][j]){
+        switch(map[stage_num][i][j]){
           case 48:
             mvwaddch(w1, i, j, ' ');
             break;
@@ -212,7 +212,7 @@ void Snake::ShowWin(WINDOW* w1){
             mvwaddch(w1, i, j, 'P');
             break;
           case 55:
-            mvwaddch(w1, i, j, 'A');
+            mvwaddch(w1, i, j, '?');
             break;
           case 57:
             mvwaddch(w1, i, j, ' ');
@@ -220,13 +220,12 @@ void Snake::ShowWin(WINDOW* w1){
      }
    }
 }
-void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
+bool Snake::Game(WINDOW* w1, Board b, int stage_num){
 
   int d = KEY_RIGHT; // Snake 진행방향
   int old_d = 3;// Snake 이전 진행방향
   int q = 0;
   int g; //gate 들어갔는지 확인 변수
-  Board b;
   int Gcount = 0, Pcount = 0 , Gatecount = 0;
   SpawnItem(stage_num);
   SpawnGate(stage_num, h, w);
@@ -280,7 +279,7 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
     switch(old_d){
       case 1:
       if(GetItem(body[0].first - 1, body[0].second)){
-        if(diffItem(body[0].first -1, body[0].second, &Gcount, &Pcount)){
+        if(diffItem(body[0].first -1, body[0].second, &Gcount, &Pcount, stage_num)){
           body.insert(body.begin(),(make_pair(body[0].first - 1, body[0].second)));
         }else{
           UpdateSnake();
@@ -296,7 +295,7 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
         break;
       case 2:
       if(GetItem(body[0].first + 1, body[0].second)){
-        if(diffItem(body[0].first +1, body[0].second, &Gcount, &Pcount)){
+        if(diffItem(body[0].first +1, body[0].second, &Gcount, &Pcount, stage_num)){
           body.insert(body.begin(),(make_pair(body[0].first + 1, body[0].second)));
         }else{
             UpdateSnake();
@@ -311,7 +310,7 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
         break;
       case 3:
       if(GetItem(body[0].first, body[0].second + 1)){
-        if(diffItem(body[0].first , body[0].second + 1, &Gcount, &Pcount)){
+        if(diffItem(body[0].first , body[0].second + 1, &Gcount, &Pcount, stage_num)){
           body.insert(body.begin(),(make_pair(body[0].first, body[0].second + 1)));
         }else{
           UpdateSnake();
@@ -326,7 +325,7 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
         break;
       case 4:
       if(GetItem(body[0].first, body[0].second - 1)){
-        if(diffItem(body[0].first , body[0].second - 1, &Gcount, &Pcount)){
+        if(diffItem(body[0].first , body[0].second - 1, &Gcount, &Pcount, stage_num)){
           body.insert(body.begin(),(make_pair(body[0].first, body[0].second -1)));
         }else{
           UpdateSnake();
@@ -342,17 +341,24 @@ void Snake::Game(WINDOW* w1, WINDOW* score, WINDOW* mission, int stage_num){
 
       q = CrushBody(stage_num);
 
-      if(q == 1){break;}
+      if(q == 1){
+        b.gameover();
+        delwin(w1);
+        return false;}
 
       ShowSnake(stage_num);
       DelGate(stage_num, h, w);
       DelItem(stage_num); // 아이템 삭제 조건 충족 시 삭제 후 재 생성
-      ShowWin(w1);
+      ShowWin(w1, stage_num);
 
     wrefresh(w1);
-    b.ScoreBoard(score, body.size(),  Gcount, Pcount, Gatecount);
-    wrefresh(score);
-    wrefresh(mission);
+    b.ScoreBoard(body.size(), body.size(),  Gcount, Pcount, Gatecount);
+    if(b.MissionBoard(body.size(),  Gcount, Pcount, Gatecount)){
+      b.gameover();
+      delwin(w1);
+      return true;
+    }
+
 
   }
 }

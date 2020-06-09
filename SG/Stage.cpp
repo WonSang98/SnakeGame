@@ -27,22 +27,19 @@ void Stage::InitHome(){
   key = getch();
   switch(key){ // ENTER입력 시 sTAGE1 실행
     case 10:
-      Stage_1();
+      Start(1);
   }
-  mvprintw(3, 4, "EndGame , press anykey -> shutdown");
   refresh();
-  getch();
   endwin();
 }
 
-void Stage::Stage_1(){
-
+void Stage::Start(int step){
+  int now = step;
+  int next = now + 1;
   WINDOW *s1 = newwin(s1_h, s1_w, sy, sx); //stage1 화면 생성.
-  WINDOW *score = newwin(15, 40, 5, 80);
-  WINDOW *mission = newwin(15, 40, 21, 80);
-  Mission(mission);
+  Board b(Goal[step][0], Goal[step][1], Goal[step][2], Goal[step][3]);
 
-  init_pair(2, COLOR_RED, COLOR_BLACK);
+  init_pair(2, COLOR_GREEN, COLOR_BLACK);
   attron(COLOR_PAIR(2));
   wbkgd(s1, COLOR_PAIR(2));
 
@@ -50,19 +47,54 @@ void Stage::Stage_1(){
   nodelay(s1, TRUE); // 입력을 안 받아도 넘어가게 해 주는 함수.
 
   Snake s(10, 10, s1_h, s1_w); //20, 20위치에 뱀 생성.
-  s.Game(s1, score, mission, 0);
-  getch();
-  delwin(s1);
+  WINDOW *msg = newwin(15, 40, 15, 30);
+  int k;
+  if(s.Game(s1, b, now)){//stage clear
+    if(now == 3){//mission all clear
+      stage_msg(msg, 2);
+      k = wgetch(msg);
+      switch(k){
+        case '1':
+          delwin(msg);
+          delwin(s1);
+          Start(next);
+          break;}
+    }
+    else{
+      stage_msg(msg, 1);
+      k = wgetch(msg);
+      switch(k){
+        case '1':
+          delwin(msg);
+          delwin(s1);
+          Start(next);
+          break;}
+    }
+  }else{//stage fail
+    stage_msg(msg, 3);
+    k = wgetch(msg);
+    switch(k){
+      case '1':
+        delwin(msg);
+        delwin(s1);
+        Start(0);
+        break;
+    }
+
+  }
 }
-void Stage::Mission(WINDOW *mission){
+
+void Stage::stage_msg(WINDOW* clear, int condition){
   init_pair(3, COLOR_BLACK, COLOR_WHITE);
-  wmove(mission, 0, 0);
-  wattron(mission, COLOR_PAIR(3));
-  wborder(mission, '|','|','-','-','*','*','*','*');
-  wbkgd(mission, COLOR_PAIR(3));
-  mvwprintw(mission, 3, 3, " B : " );
-  mvwprintw(mission, 4, 3, " + : " );
-  mvwprintw(mission, 5, 3, " - : " );
-  mvwprintw(mission, 6, 3, " G : ");
-  wrefresh(mission);
+  wmove(clear, 0, 0);
+  wattron(clear, COLOR_PAIR(3));
+  wborder(clear, '|','|','-','-','*','*','*','*');
+  wbkgd(clear, COLOR_PAIR(3));
+  if(condition == 1)
+    mvwprintw(clear, 2, 3, " MISSION CLEAR!\n NEXT STAGE : 1, any other key is end game");
+  else if(condition == 2)
+    mvwprintw(clear, 2, 3, " ALL Clear Mission!\n RE-Start game : 1, any other key is end game");
+  else if (condition == 3)
+    mvwprintw(clear, 2, 3, "MISSION FAIL!\n RETRY : 1, any other key is end game");
+  wrefresh(clear);
 }
