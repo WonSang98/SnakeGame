@@ -14,4 +14,5 @@ public:
   void InitHome();// 처음 시작화면(윈도우 생성)
   void Start(int step); // First Stage
   void stage_msg(WINDOW* clear, int condition);
+  void Home();
 };
