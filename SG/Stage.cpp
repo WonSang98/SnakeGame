@@ -46,8 +46,10 @@ void Stage::Start(int step){
             delwin(msg);
             delwin(s1);
             clear();
-            Start(next);}
+            Start(0);}
     }
+    delwin(msg);
+    delwin(s1);
     clear();
     Home();
   }else{
@@ -61,6 +63,8 @@ void Stage::Start(int step){
             clear();
             Start(next);}
     }
+    delwin(msg);
+    delwin(s1);
     clear();
     Home();}
   }else{ //stage fail
@@ -74,6 +78,8 @@ void Stage::Start(int step){
           clear();
           Start(0);}
     }
+    delwin(msg);
+    delwin(s1);
     clear();
     Home();
   }
@@ -155,6 +161,7 @@ void Stage::Home(){
 
   refresh();
   int key;
+  flushinp();
   while(!((key=wgetch(h)) == 'q')){
     flushinp();
   refresh();
@@ -186,4 +193,6 @@ void Stage::Home(){
       break;}
 
   }
+  endwin();
+  exit(0);
 }
