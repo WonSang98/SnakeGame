@@ -40,6 +40,7 @@ void Stage::Start(int step){
     if(now == 3){//mission all clear
       stage_msg(msg, 2);
       while(!((k=wgetch(msg)) == 'q')){
+        flushinp();
         switch(k){
           case '1':
             delwin(msg);
@@ -52,6 +53,7 @@ void Stage::Start(int step){
   }else{
       stage_msg(msg, 1);
       while(!((k=wgetch(msg)) == 'q')){
+        flushinp();
         switch(k){
           case '1':
             delwin(msg);
@@ -64,6 +66,7 @@ void Stage::Start(int step){
   }else{ //stage fail
     stage_msg(msg, 3);
     while(!((k=wgetch(msg)) == 'q')){
+      flushinp();
       switch(k){
         case '1':
           delwin(msg);
@@ -118,12 +121,12 @@ void Stage::Home(){
   "S:::::S     SSSSSSS     N:::::::::N     N::::::N                 A:::::::A                 K:::::::K   K::::::K     EE::::::EEEEEEEEE::::E",
   "S:::::S                 N::::::::::N    N::::::N                A:::::::::A                KK::::::K  K:::::KKK       E:::::E       EEEEEE",
   "S:::::S                 N:::::::::::N   N::::::N               A:::::A:::::A                 K:::::K K:::::K          E:::::E             ",
-  "S::::SSSS              N:::::::N::::N  N::::::N              A:::::A A:::::A                K::::::K:::::K           E::::::EEEEEEEEEE    ",
-  "SS::::::SSSSS         N::::::N N::::N N::::::N             A:::::A   A:::::A               K:::::::::::K            E:::::::::::::::E     ",
-  " SSS::::::::SS       N::::::N  N::::N:::::::N            A:::::A     A:::::A              K:::::::::::K            E:::::::::::::::E      ",
-  "    SSSSSS::::S      N::::::N   N:::::::::::N           A:::::AAAAAAAAA:::::A             K::::::K:::::K           E::::::EEEEEEEEEE      ",
-  "         S:::::S     N::::::N    N::::::::::N          A:::::::::::::::::::::A            K:::::K K:::::K          E:::::E                ",
-  "         S:::::S     N::::::N     N:::::::::N         A:::::AAAAAAAAAAAAA:::::A         KK::::::K  K:::::KKK       E:::::E       EEEEEE   ",
+  " S::::SSSS              N:::::::N::::N  N::::::N              A:::::A A:::::A                K::::::K:::::K           E::::::EEEEEEEEEE   ",
+  "  SS::::::SSSSS         N::::::N N::::N N::::::N             A:::::A   A:::::A               K:::::::::::K            E:::::::::::::::E   ",
+  "    SSS::::::::SS       N::::::N  N::::N:::::::N            A:::::A     A:::::A              K:::::::::::K            E:::::::::::::::E   ",
+  "       SSSSSS::::S      N::::::N   N:::::::::::N           A:::::AAAAAAAAA:::::A             K::::::K:::::K           E::::::EEEEEEEEEE   ",
+  "            S:::::S     N::::::N    N::::::::::N          A:::::::::::::::::::::A            K:::::K K:::::K          E:::::E             ",
+  "            S:::::S     N::::::N     N:::::::::N         A:::::AAAAAAAAAAAAA:::::A         KK::::::K  K:::::KKK       E:::::E       EEEEEE",
   "SSSSSSS     S:::::S     N::::::N      N::::::::N        A:::::A             A:::::A        K:::::::K   K::::::K     EE::::::EEEEEEEE:::::E",
   "S::::::SSSSSS:::::S     N::::::N       N:::::::N       A:::::A               A:::::A       K:::::::K    K:::::K     E::::::::::::::::::::E",
   "S:::::::::::::::SS      N::::::N        N::::::N      A:::::A                 A:::::A      K:::::::K    K:::::K     E::::::::::::::::::::E",
@@ -153,6 +156,7 @@ void Stage::Home(){
   refresh();
   int key;
   while(!((key=wgetch(h)) == 'q')){
+    flushinp();
   refresh();
   switch(key){ // ENTER입력 시 sTAGE1 실행
     case 10:
