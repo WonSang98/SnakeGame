@@ -119,7 +119,6 @@ void Snake::ShowSnake(int stage_num){
 >>  규칙 2는 그냥, 랜덤으로 생성하고, 나타났다 사라져야 하며 growth는 진행방향 증가 poison은 꼬리사라짐.
 몸 길이 3미만 DIE
 
-이 부분은 건민 형이 작성하시는 게 효율이 젤 좋지 않을까 싶네요 그때 계속 잡고 계셔서.
 
 ### 변수
 ```C++
@@ -162,6 +161,10 @@ void Snake::SpawnItem(int stage_num){
   }
 }
 ```
+item_n에서 한 번에 나타날 아이템의 개수를 random하게 저장하고
+itemType을 이용해서 Growth, Poison인지를 각각 정해줌 
+아이템생성가능한 좌표에 지정될 때까지 while문 돌림
+for문을 이용해 map에 itemType에 따른 item_shape 입력
 
 - UnableItem
 	해당 위치에 아이템 만들 수 있나 확인함.
@@ -173,6 +176,8 @@ bool Snake::UnableItem(int stage_num, int p1, int p2){ // 아이템이 생성 �
   return true;
 }
 ```
+
+설명생략
 - DelItem
 	시간 지나면 아이템 삭제
 ```C++
@@ -183,6 +188,7 @@ void Snake::DelItem(int stage_num){
 }
     // 만약 아이템이 생성된지 6초가 지났다면 지워버리고 새로운 아이템 생성
 ```
+시간을 비교해서 6초가 지나면 map의 item좌표를 '0'으로 바꿔주고 다시 SpawnItem호출
 
 - GetItem
 	아이템 얻었는 지 확인
@@ -197,6 +203,7 @@ bool Snake::GetItem(int f, int s){ // item 먹음.
 //vector[0].first == int f
 //vector[0].second == int s
 ```
+for문을 이용해 어떤 아이템이 뱀의 머리와 겹치면 return true
 
 - diffItem
 	먹은 아이템이 Growth인지 Poison인지 구분
@@ -214,6 +221,8 @@ bool Snake::diffItem(int f, int s, int *gcnt, int *pcnt, int stage_num){
 }
 //전반적인 Logic은 GetItem과 유사.
 ```
+map좌표의 모양과 item_shape비교해서 Growth item이면 Growth counter인 gcnt 1증가, return true
+Poison item이면 Poison counter인 pcnt 1증가, return false
 
 - 아이템 섭취 후 Snake변화 
 ```C++
@@ -240,6 +249,15 @@ switch(old_d){
           //pop_back 이전까지는 원래 뱀이 움직이는 로직. 뱀이 다 움직일거 움직이고 꼬리 하나 잘랐다고 생각.
         }
  ```
+머리가 진행한 곳에 GetItem을 이용해 아이템이 있는지 확인 true일 경우{
+	diffItem을 이용 아이템 판별, true일 경우(Growth item){
+	insert를 이용해 '머리 앞부분'에 추가
+	}
+	diffItem을 이용 아이템 판별, false일 경우(Poison item){
+	poison을 먹은 경우 꼬리가 잘리기 때문에 UpdateSnake와 머리를 진행방향으로 진행 후, pop_back
+	}
+}
+ 
 
 Game 함수 중 일부 발췌.
 주석을 달아 설명
