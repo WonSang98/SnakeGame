@@ -249,14 +249,14 @@ switch(old_d){
           //pop_back 이전까지는 원래 뱀이 움직이는 로직. 뱀이 다 움직일거 움직이고 꼬리 하나 잘랐다고 생각.
         }
  ```
-머리가 진행한 곳에 GetItem을 이용해 아이템이 있는지 확인 true일 경우{
-	diffItem을 이용 아이템 판별, true일 경우(Growth item){
+-머리가 진행한 곳에 GetItem을 이용해 아이템이 있는지 확인 true일 경우
+	-diffItem을 이용 아이템 판별, true일 경우(Growth item)
 	insert를 이용해 '머리 앞부분'에 추가
-	}
-	diffItem을 이용 아이템 판별, false일 경우(Poison item){
+	
+	-diffItem을 이용 아이템 판별, false일 경우(Poison item)
 	poison을 먹은 경우 꼬리가 잘리기 때문에 UpdateSnake와 머리를 진행방향으로 진행 후, pop_back
-	}
-}
+	
+
  
 
 Game 함수 중 일부 발췌.
