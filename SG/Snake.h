@@ -9,7 +9,7 @@ public:
   int set_x, set_y; // Snake 생성 좌표 지정.
   int min_len = 3;
   int max_len = 12; // Snake 최소 최대 길이 지정.
-  vector <pair<int, int>> body; //Snake의 몸 좌표 저장. 0(head) ~ -1(tail)
+  vector <pair<int, int> > body; //Snake의 몸 좌표 저장. 0(head) ~ -1(tail)
   int item_pos[3][4] = {0}; //item이 생성 될 좌표를 저장할 배열.(poison or grow)
   int item_n = 0; //grow 의 개수
   int itemType = 0;
