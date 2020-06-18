@@ -1,5 +1,4 @@
 #include <ncurses.h>
-#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <unistd.h>
