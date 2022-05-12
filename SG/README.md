@@ -107,9 +107,6 @@ void Snake::ShowSnake(int stage_num){
 
 2. Move Snake
 
-   Snake 움직이는 부분까지는 같이 짜고 했으니까 설명 그냥 패스하겠습니다.
-   원래 대강 다 정리해 보려 했는데, 굳이 그럴 필요도 없을 거 같아서. 제 독단으로 짰던 부분에 대해서만 좀 설명 들어갈게요.
-
 
 
 ## 3단계
@@ -272,15 +269,13 @@ Game 함수 중 일부 발췌.
 ● Wall(Immune Wall 포함)과 Gate를 Map 배열에 표현할 때 값을 결정한다.
 
 
-규칙 ㄹㅇ 개많다. 
-
 규칙 요약
 게이트
-2개 / 겹치기 ㄴ / wall에서만 / 한번에 한쌍 / 
-gate진입중인경우 안사라짐 
+2개 / 겹치기 X / wall에서만 / 한번에 한쌍 / 
+gate진입중인경우 사라지지 않음
 규칙 4... 후술
-규칙 5 게이트 wall에서만, 벽꿍사
-gate출현 방ㅂㅓㅂ 결정
+규칙 5 게이트 wall에서만, 벽에 부딪히면 게임 종료
+gate출현 방법 결정
 
 - 변수
 ```C++
@@ -326,7 +321,7 @@ void Snake::SpawnGate(int stage_num, int h, int w){
 ```
 
 - 규칙 4
-	뭐 어떻게 설명하기 힘들다. ppt규칙읽으면서 코드 정독하는 것을 추천...
+	
 ```C++
 int Snake::DefineGate(int stage_num, int d, int gatey, int gatex){
   //parameter
@@ -589,8 +584,6 @@ void Board::gameover(){
 }
 ```
 
-이 부분은 크게 설명할 게 없는게
-그냥 Snake.game하는 도중에
 ```C++
 b.ScoreBoard(body.size(), MaxBody,  Gcount, Pcount, Gatecount);
 if(b.MissionBoard(body.size(),  Gcount, Pcount, Gatecount)){
@@ -600,9 +593,6 @@ return true;
       ```
      
   한번 틱이 돌면서 아이템을 먹은거나 bodysize의 변화를 반영해서 Score 띄워주고
-  bool타입 return하는 Mission은 Board 생성자로 들어온 클리어 조건에 충족했으면 게임 종료하고
-  조건 충족되는 틱이 지나면 clear했다고 표시하고, 주석이 별 필요없이 직관적이라 쉽게 이해 가능하실듯...
+  bool타입 return하는 Mission은 Board 생성자로 들어온 클리어 조건에 충족했으면 게임 종료
+  조건 충족되는 틱이 지나면 clear
 ````
-
-
-기본적으로 1~6단계 까지 사용되는 함수 정리해드렸읍니다. 이거 토대로 보고서 작성하시면 될 듯하구요, 아마 주요 함수 외에 함수가 있긴한데 약간 곁다리로 들어가는 부분도 한 번 살펴보시고 보고서 화이팅해 주시면 감사하겠습니다..
